@@ -183,7 +183,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://ainewview.github.io/2026/01/11/article-1/">
+    <link itemprop="mainEntityOfPage" href="https://ainewview.github.io/2026/01/11/gemini_skills/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/ainewview.png">
@@ -201,7 +201,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2026/01/11/article-1/" class="post-title-link" itemprop="url">Gemini 3顶级玩家才知道的深度用法！</a>
+          <a href="/2026/01/11/gemini_skills/" class="post-title-link" itemprop="url">Gemini 3顶级玩家才知道的深度用法！</a>
         </h2>
 
         <div class="post-meta-container">
@@ -313,7 +313,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://ainewview.github.io/2026/01/11/test-tool.md/">
+    <link itemprop="mainEntityOfPage" href="https://ainewview.github.io/2026/01/11/llm4rec/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/ainewview.png">
@@ -331,7 +331,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2026/01/11/test-tool.md/" class="post-title-link" itemprop="url">ChatGPT使用指南</a>
+          <a href="/2026/01/11/llm4rec/" class="post-title-link" itemprop="url">llm4rec/生成式检索在大厂主流方案拆解，附业内最新进展</a>
         </h2>
 
         <div class="post-meta-container">
@@ -343,7 +343,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2026-01-11 00:00:00 / 修改时间：20:53:16" itemprop="dateCreated datePublished" datetime="2026-01-11T00:00:00+08:00">2026-01-11</time>
+      <time title="创建时间：2026-01-11 00:00:00 / 修改时间：22:30:14" itemprop="dateCreated datePublished" datetime="2026-01-11T00:00:00+08:00">2026-01-11</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -365,7 +365,87 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>文章正文内容…</p>
+          <h1 id="一、落地位置：从“单点插件”到“全链路重构”"><a href="#一、落地位置：从“单点插件”到“全链路重构”" class="headerlink" title="一、落地位置：从“单点插件”到“全链路重构”"></a>一、落地位置：从“单点插件”到“全链路重构”</h1><h2 id="1-1-召回-检索阶段"><a href="#1-1-召回-检索阶段" class="headerlink" title="1.1 召回&#x2F;检索阶段"></a>1.1 召回&#x2F;检索阶段</h2><ul>
+<li><p><strong>代表论文</strong>：<br>TIGER（Google）, GRID（snap）, Next-User（字节）, RecGPT（腾讯-同时具有召排能力）</p>
+</li>
+<li><p><strong>核心逻辑</strong>：索引革命<br>用离散化的 ID 生成代替向量检索（ANN）。特别是在冷启动场景，通过生成式建模实现“以物找人”。</p>
+</li>
+<li><p><strong>常见做法</strong><br>i2i：把item的信息转换成序列形式，经过llm decoder，输出向量或者语义id，做i2i召回。一般会在prompt形式和loss上进行魔改<br>u2i：提取item多模态信息（item描述、正负action）做user序列，经过一个user llm之后，用类似方法做u2i召回</p>
+</li>
+</ul>
+<h2 id="1-2-精排"><a href="#1-2-精排" class="headerlink" title="1.2 精排"></a>1.2 精排</h2><ul>
+<li><p><strong>代表论文</strong><br>SID-Better Generalization（Google）、HSTU（meta-同时有召排能力）、GenRank（小红书）、RankMixer（字节）、OneTrans（字节）、HLLM（字节-同时有召排能力）</p>
+</li>
+<li><p><strong>核心逻辑</strong>：排序模型存量替换。<br>特征构建：通过语义ID替换随机ID，提升排序模型对长尾和新项的泛化能力。<br>架构性能：高 MFU 架构、统一特征 Transformer<br>item交互：不改变级联架构，但在精排或重排环节引入 Transformer 结构，利用注意力机制捕获item间的上下文交互。</p>
+</li>
+<li><p><strong>常见做法</strong><br>token–based精排模型：主要是LLM作为特征提取器，后续还会走传统的dlrm<br>生成式排序小模型的scaling law：训练一个用户行为序列的user llm，然后直接用输出的向量通过相似度计算或者beam search找到最相关的id或者id序列作为模型最终输出结果。</p>
+</li>
+</ul>
+<h2 id="1-3-重排"><a href="#1-3-重排" class="headerlink" title="1.3 重排"></a>1.3 重排</h2><ul>
+<li><p><strong>代表论文</strong><br>SORT-Gen (淘宝)、MTGR（美团推荐）</p>
+</li>
+<li><p><strong>核心逻辑</strong>：跟精排类似</p>
+</li>
+<li><p><strong>常见做法</strong><br>输出序列：需要输出一个ID list，但是精排可以只输出topN的IDs<br>学习方案：通过强化学习，将list目标（比如留存、整页点击）作为reward来指导学习</p>
+</li>
+</ul>
+<h2 id="1-4-端到端统一"><a href="#1-4-端到端统一" class="headerlink" title="1.4 端到端统一"></a>1.4 端到端统一</h2><ul>
+<li><p><strong>代表论文</strong><br>OneRec (V1&#x2F;V2)（快手推荐）、OneSearch（快手搜索）、UniROM（美团广告）、EGA-V2（美团广告）、HSTU（meta，同时具有召排能力）</p>
+</li>
+<li><p><strong>核心逻辑</strong><br>架构终结者。</p>
+</li>
+</ul>
+<p>架构统一：直接从全库生成最终列表。打破召回、粗排、精排的界限，用一个大模型直接从全库生成推荐列表，解决多阶段损耗问题。<br>业务逻辑统一：EGA-V2 甚至整合了出价、创意生成和计费等业务逻辑，实现真正的全流程闭环。</p>
+<h1 id="二、技术范式：三大核心演进路线"><a href="#二、技术范式：三大核心演进路线" class="headerlink" title="二、技术范式：三大核心演进路线"></a>二、技术范式：三大核心演进路线</h1><p>这些论文展示了工业界在解决生成式模型“慢、准、大”三个问题上的不同技术路径：</p>
+<p><strong>标识符范式 (Tokenization Strategy)</strong>：LLM作为特征抽取器or发挥其原生文本能力，因此可以作为传统推荐模型的特征输入&#x2F;输出</p>
+<ul>
+<li><strong>语义 ID 化 (Semantic ID)</strong>：如 TIGER 和 GRID，利用 RQ-VAE 将 Embedding 变为层级码本。</li>
+<li><strong>文本&#x2F;属性 Token 化</strong>：发挥LLM的原生文本能力，用于用户画像、长短期兴趣抽取并用于下游。如 RecGPT 和 OneSearch (KHQE)，直接将商品文本属性转化为 Token，实现跨域泛化和强相关性约束。</li>
+<li><strong>稀疏+稠密级联</strong>：如 COBRA，先生成稀疏 ID 缩小范围，再生成稠密向量精修，兼顾检索效率与精度。</li>
+</ul>
+<p><strong>架构性能范式 (Efficiency Backbone)</strong>：模型复杂化，实现LLM的scaling law</p>
+<ul>
+<li><strong>Decoder-Only 与“懒加载”</strong>：OneRec-V2 从 Encoder-Decoder 转向 Lazy Decoder-Only，大幅减少了序列编码的重复计算（计算量减少 94%）。</li>
+<li><strong>非 Transformer 高效算子</strong>：Meta 的 HSTU 抛弃了标准 Attention，采用针对推荐数据设计的 Sequential Transducers，在长序列（8k+）上比 FlashAttention 快 10 倍以上。其他的比如MTGR。</li>
+<li><strong>MFU 导向设计</strong>：RankMixer、GenRank和OneTrans 重点优化 GPU 利用率，通过参数共享和统一 Tokenizer 解决工业级超高 QPS 下的推理瓶颈。</li>
+</ul>
+<p><strong>训练与对齐范式 (Optimization &amp; Alignment)</strong></p>
+<ul>
+<li><strong>特征交叉</strong>：MTGR (美团) 提出不能盲目跟随 LLM，必须保留传统精排的“交叉特征”，通过一种三步走范式兼顾 Scaling Law 和特征工程。</li>
+<li><strong>学习目标-自回归</strong>：将用户行为序列类比成文本序列，以Next Token Prediction范式训练模型，如Meta HSTU、字节HLLM、快手One系列、Google的Tiger等，通常有三种用法</li>
+<li>通过生成对应的语义ID直接完成推荐</li>
+<li>通过生成的向量，并用生成的向量结合ANN检索完成召回</li>
+<li>通过生成的向量，跟待排序item的相似度计算后的得分完成排序</li>
+<li>学习目标-列表级回归：SORT-Gen 将排序建模为“序列有序回归”，解决多目标优化中的价值预估问题。</li>
+<li>学习目标-偏好对齐 (RLHF&#x2F;RL)：比如OneRec 系列引入了 ECPO (强化学习)，让模型不仅仅是预测“下一个点击”，而是直接优化长期留存、时长等业务指标。</li>
+</ul>
+<h1 id="三、生成式检索能够带来效果提升的原因"><a href="#三、生成式检索能够带来效果提升的原因" class="headerlink" title="三、生成式检索能够带来效果提升的原因"></a>三、生成式检索能够带来效果提升的原因</h1><h2 id="3-1-架构优化带来一致性提高：包括特征一致性和目标一致性"><a href="#3-1-架构优化带来一致性提高：包括特征一致性和目标一致性" class="headerlink" title="3.1 架构优化带来一致性提高：包括特征一致性和目标一致性"></a>3.1 架构优化带来一致性提高：包括特征一致性和目标一致性</h2><p><strong>彻底解决“特征损失”与“阶段损耗”</strong>：传统架构（双塔模型）将用户和商品压缩为两个独立的向量，检索本质上是在计算“余弦相似度”。</p>
+<ul>
+<li><strong>信息无损化</strong>：生成式检索通过自回归解码直接预测商品的标识符（Semantic ID）。它在解码的每一步都能感知到之前生成的 Token，这种细粒度的交互比简单的向量内积能捕获更复杂的语义。</li>
+<li><strong>目标一致性</strong>：传统级联架构（召回、预排、精排）存在严重的目标不一致。生成式检索（如 OneRec, UniROM）倾向于端到端建模，减少了中间环节因截断导致的“高潜力候选遗失”。</li>
+</ul>
+<p><strong>全局视野</strong>：从 Pointwise 到 Listwise：传统检索是“点对点”的：给每个候选算分，谁分高谁上。</p>
+<ul>
+<li><strong>上下文交互</strong>：生成式架构（如 GenRank, HSTU）自带 Attention 机制。在检索&#x2F;生成过程中，模型能感知到当前已经选择了哪些商品。</li>
+<li><strong>外部性建模</strong>：模型能够自动学习到商品之间的排斥或吸引关系（例如：如果已经生成了一个运动鞋，下一个生成的更有可能是袜子而非另一双同款鞋），从而在检索阶段就优化了结果的多样性和整体排列价值。</li>
+</ul>
+<h2 id="3-2-LLM能力通过世界知识和scaling-law带来能力提升"><a href="#3-2-LLM能力通过世界知识和scaling-law带来能力提升" class="headerlink" title="3.2 LLM能力通过世界知识和scaling law带来能力提升"></a>3.2 LLM能力通过世界知识和scaling law带来能力提升</h2><p><strong>LLM世界知识构建的语义标识符（Semantic ID）带来的强泛化</strong>：这是生成式检索效果提升的关键底层支柱。</p>
+<ul>
+<li><strong>从“死编码”到“活语义”</strong>：传统 ID（如 item_123）是随机哈希的，不同 ID 之间没有关联。生成式检索使用如 TIGER 或 GRID 中提到的语义 ID（通过 RQ-VAE 生成）。</li>
+<li><strong>层次化关联</strong>：语义 ID 通常具有层级结构（例如 [类别] - [子类] - [属性]）。这使得模型在检索时，即使是一个全新的冷启动商品，只要它具备相似的语义 Token，模型就能根据“前缀共享”逻辑精准召回，显著提升了长尾和冷启动项的效果。</li>
+</ul>
+<p><strong>释放 Scaling Law（规模效应）</strong>：生成式架构（主要是 Transformer 变体）在 NLP 和 CV 领域已经证明了“模型越大，效果越好”。</p>
+<ul>
+<li><strong>参数红利</strong>：传统 DLRM 模型的参数大头在 Embedding 层，模型计算层相对较少。而生成式检索（如 Meta 的 HSTU）将参数重心转向了计算层。</li>
+<li><strong>复杂特征建模</strong>：HSTU 等模型能处理数千甚至上万长度的用户行为序列。这种超长序列的建模能力，让模型能从海量历史中挖掘出极其微弱但精准的兴趣信号，这是传统召回模型难以企及的。</li>
+</ul>
+<h1 id="四、生成式检索当前存在的挑战"><a href="#四、生成式检索当前存在的挑战" class="headerlink" title="四、生成式检索当前存在的挑战"></a>四、生成式检索当前存在的挑战</h1><p>但仍然会存在一些问题，个人认为主要集中在以下四类：</p>
+<ul>
+<li><strong>实时性问题</strong>：更新速度不如流式更新快</li>
+<li><strong>性能问题</strong>：LLM的scaling law依赖更多的参数，对资源和时间的消耗都会有明显的增加，需要搭配很极致的架构和性能优化</li>
+<li><strong>业务问题</strong>：跟业务策略的融合比较麻烦，比如业务的硬规则逻辑、广告的出价策略</li>
+<li><strong>输出问题</strong>：通常是输出一个id序列，如何同时兼顾模型得分的输出，比如广告的ctr</li>
+</ul>
 
       
     </div>
@@ -392,7 +472,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://ainewview.github.io/2026/01/10/hello-world/">
+    <link itemprop="mainEntityOfPage" href="https://ainewview.github.io/2026/01/11/manus/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/ainewview.png">
@@ -410,7 +490,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2026/01/10/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+          <a href="/2026/01/11/manus/" class="post-title-link" itemprop="url">起底Manus被查背后的真相</a>
         </h2>
 
         <div class="post-meta-container">
@@ -420,8 +500,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2026-01-10 09:45:16" itemprop="dateCreated datePublished" datetime="2026-01-10T09:45:16+08:00">2026-01-10</time>
+      <time title="创建时间：2026-01-11 00:00:00 / 修改时间：22:14:10" itemprop="dateCreated datePublished" datetime="2026-01-11T00:00:00+08:00">2026-01-11</time>
     </span>
 
   
@@ -434,19 +515,24 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+          <p>最近Manus被商务部审查的消息，在AI圈里讨论度挺高。大家一边在感叹Manus的创富奇迹，一边又被商务部审查打了个措手不及。<br>不少人觉得这只是一起普通的企业并购审查，但我琢磨着，这事儿本质是给所有想“出海”或“被海外收购”的AI公司提了个醒——<br><strong>AI技术早就不是随便买卖的普通商品了，跨境交易的“合规红线”已经划得很清楚了。</strong><br>先给不了解的朋友梳理下脉络线：</p>
+<ul>
+<li>2022年，Manus（蝴蝶效应科技）在北京创立。</li>
+<li>2025年5月，关闭大陆服务，总部迁移到新加坡，核心团队与代码转移。</li>
+<li>2025年12月30日，meta官宣以超过20亿美元收购Manus，创始人肖弘任meta副总裁。</li>
+</ul>
+<p>2026年1月8日，商务部宣布会同相关部门就交易合规性开展评估调查。<br>通俗解释下，这事儿到底是个啥情况。<br>举个简单的例子，Manus就像一家专门做“智能工具”的小厂，核心产品是AI智能体（Agent），相当于给企业或个人配了个“智能小助理”，能自动处理不少复杂任务。后来Meta（就是脸书那家公司）看上了，想花20亿美元把它买下来，<strong>不仅要拿它的核心技术，还得把整个核心团队都挖过去，让Manus以后不在中国运营了。</strong><br>Manus这边可能也怕麻烦，提前把公司主体从北京迁到了新加坡，想靠着“换个户口”的操作，淡化自己的中国背景，减少中美两边的审查风险。<br><strong>结果没想到，2026年初商务部还是出手了，要查这桩收购案。</strong></p>
+<p>可能有人会问，不就是一家公司被收购吗？为啥监管要管这么多？<br>这就得多说两句了。要是换成普通的小公司，比如一家做文具的厂子被收购，监管大概率不会这么重视。但Manus不一样，它做的是前沿AI技术——这玩意儿现在就像高端机床、核心芯片，属于国家要重点保护的战略资源。<br>具体来说，监管主要盯着三件事，这也是这事儿的核心争议点。</p>
+<p><strong>第一，核心技术能不能随便“卖”？</strong><br>Manus的AI智能体技术，已经被纳入了国家“限制出口”的技术清单里。这种敏感AI技术要卖到国外，必须先向商务部申请许可。Manus可能没做这个申请，想靠着“迁公司+挖团队”的方式，把技术偷偷带出去——这在监管眼里，就是“非法出口”。</p>
+<p><strong>第二，数据能不能随便带出去？</strong><br>AI公司的核心除了技术，就是数据。Manus在国内运营这么久，肯定积累了不少用户数据和研发数据。这些数据就像你家手艺的“配方笔记”，随便带到国外是不行的。国家有规定，重要数据出境必须经过安全评估，不然就相当于把核心机密泄露了。监管要查的，就是Manus有没有偷偷把这些“配方笔记”转移到国外。</p>
+<p><strong>第三，“换个户口”就能规避监管吗？</strong><br>Manus把公司迁到新加坡，看似是“外国公司”了，但它的核心技术是在国内研发的，核心团队也是中国人。这种操作就像一个人换了个身份证，但骨子里还是中国人，祖传的手艺还是在中国学的。监管现在已经不看你“户口在哪”了，而是看你“技术从哪来、团队从哪来”，想靠这种方式规避审查，基本行不通。</p>
+<p>聊完这事儿的核心，我想说说自己的感悟——这事儿绝对不是个案，而是AI行业进入“下半场”后的必然结果。<br>之前AI行业的重点是“搞技术、提能力”，就像大家都在埋头修炼“内功”，谁能做出更厉害的模型，谁就是老大。但现在不一样了，技术能力上来了，大家开始想办法“变现”，跨境并购、技术出海就成了常见的路径。这时候监管必然会跟上，就像一个行业发展到一定阶段，必须要有规矩约束，不然就会乱套。</p>
+<p>对AI公司来说，这事儿的警示意义特别大。以前可能觉得“只要技术好，在哪都能卖”，现在必须先想清楚“这技术能不能卖、怎么卖才合规”。<br>再往大了说，这事儿也体现了国家对“AI技术主权”的重视。在中美科技博弈的大背景下，前沿AI技术就是“国之重器”，绝对不能轻易外流。以前我们可能担心“技术不如人”，现在技术上来了，更要担心“技术被偷走”。监管的介入，就是在为整个行业“保驾护航”，避免核心技术流失。</p>
+<p>至于这事儿的后续走向，我猜大概率是两种情况或者是搞个居中版本：</p>
+<ul>
+<li>要么Manus补全所有合规手续，比如重新申请技术出口许可、做数据出境评估，调整收购方案，保留一部分技术控制权；</li>
+<li>要么就是这桩收购案直接终止，Meta买不到核心技术。不管是哪种结果，都会成为以后AI跨境并购的“标杆案例”，让更多企业知道“什么能做、什么不能做”。<br>希望大家在AI遍地开花的新时代，都能有自己的用武之地，共勉！</li>
+</ul>
 
       
     </div>
